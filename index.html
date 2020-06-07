@@ -6,10 +6,13 @@
     <title>Vue-crud-pouchdb</title>
     <link rel="stylesheet" href="css/bootstrap.min.css" />
     <script src="js/vue.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9.14.2/dist/sweetalert2.all.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9.14.2/dist/sweetalert2.all.min.js"></script>
   </head>
   <body>
     <div id="app">
-      <div class="container">
+      <div class="container-fluid">
         <br />
         <div class="row">
           <div class="col-md-8">
@@ -20,6 +23,7 @@
                   <th>Name</th>
                   <th>Email</th>
                   <th>Address</th>
+                  <th width="130">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -28,6 +32,20 @@
                   <td>{{ item.name }}</td>
                   <td>{{ item.email }}</td>
                   <td>{{ item.city }}</td>
+                  <td class="text-center">
+                    <button
+                      @click="editItem(item)"
+                      class="btn btn-warning btn-sm"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      @click="deleteItem(item)"
+                      class="btn btn-danger btn-sm"
+                    >
+                      Delete
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -38,9 +56,10 @@
                 <label for="id">ID</label>
                 <input
                   type="text"
-                  v-model="input.id"
                   class="form-control"
                   id="id"
+                  v-model="input.id"
+                  readonly
                 />
               </div>
               <div class="form-group">
@@ -71,11 +90,20 @@
                 />
               </div>
               <button
+                v-if="submitbtn"
                 type="submit"
                 @click.prevent="submitForm"
                 class="btn btn-primary"
               >
                 Submit
+              </button>
+              <button
+                v-if="updatebtn"
+                type="submit"
+                @click.prevent="updateItem(input.id)"
+                class="btn btn-primary"
+              >
+                Update
               </button>
               <button
                 type="submit"
@@ -93,47 +121,99 @@
       let app = new Vue({
         el: '#app',
         data: {
-          items: [
-            {
-              id: '1',
-              name: 'John',
-              email: 'john@gmail.com',
-              city: 'Brussels',
-            },
-            {
-              id: '2',
-              name: 'Mary',
-              email: 'mary@gmail.com',
-              city: 'Berlin',
-            },
-            {
-              id: '3',
-              name: 'Charlie',
-              email: 'charlie@gmail.com',
-              city: 'London',
-            },
-          ],
+          items: [],
           input: {
             id: '',
             name: '',
             email: '',
             city: '',
           },
+          submitbtn: true,
+          updatebtn: false,
+        },
+        created() {
+          this.view()
+          this.input.id = this.items.length + 1
         },
         methods: {
+          view() {
+            this.items = [
+              {
+                id: '1',
+                name: 'John',
+                email: 'john@gmail.com',
+                city: 'Brussels',
+              },
+              {
+                id: '2',
+                name: 'Mary',
+                email: 'mary@gmail.com',
+                city: 'Berlin',
+              },
+              {
+                id: '3',
+                name: 'Charlie',
+                email: 'charlie@gmail.com',
+                city: 'London',
+              },
+            ]
+          },
           submitForm() {
-            let id = this.input.id
+            // set id to timestamp
+            let d = new Date()
+            let id = d.getTime()
+            // let id = this.input.id
             let nm = this.input.name
             let em = this.input.email
             let ci = this.input.city
             this.items.push({ id: id, name: nm, email: em, city: ci })
             this.clearForm()
+            // sweetalert2
+            Swal.fire('Added', 'New data added', 'success')
           },
           clearForm() {
+            this.submitbtn = true
+            this.updatebtn = false
             this.input.id = ''
             this.input.name = ''
             this.input.email = ''
             this.input.city = ''
+          },
+          editItem(item) {
+            this.submitbtn = false
+            this.updatebtn = true
+            this.input.id = item.id
+            this.input.name = item.name
+            this.input.email = item.email
+            this.input.city = item.city
+          },
+          updateItem(id) {
+            // find the index of the item where a key matches a value
+            let ref = this.items.findIndex((x) => x.id === id)
+            // assign is used to merge object with same props (target, source)
+            Object.assign(this.items[ref], this.input)
+            // Below is the original code which does not work when id's get out of sync
+            // let myId = id - 1
+            // Object.assign(this.items[myId], this.input)
+            this.clearForm()
+            Swal.fire('Updated', 'Entry has been updated', 'success')
+          },
+          deleteItem(item) {
+            let del = this.items.indexOf(item)
+            Swal.fire({
+              title: 'Are you sure?',
+              text: "You won't be able to revert this!",
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonColor: 'danger',
+              cancelButtonColor: 'warning',
+              confirmButtonText: 'Yes, delete it!',
+            }).then((result) => {
+              if (result.value) {
+                this.items.splice(del, 1)
+                Swal.fire('Deleted!', 'Your file has been deleted.', 'success')
+              }
+            })
           },
         },
       })
