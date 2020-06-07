@@ -1,8 +1,8 @@
 # vue-crud-pouchdb
 
-## v1 - Vue C + R
+## v2 - Vue C + R + U + D
 
 - vue.js script tag
 - css: bootstrap
-- READ table
-- CREATE items
+- CRUD table
+- SweetAlert2 (https://sweetalert2.github.io/) for confirmation windows
