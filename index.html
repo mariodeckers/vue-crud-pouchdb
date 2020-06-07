@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vue-crud-pouchdb</title>
     <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
     <script src="js/vue.js"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9.14.2/dist/sweetalert2.all.min.js"></script> -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script> -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9.14.2/dist/sweetalert2.all.min.js"></script>
   </head>
   <body>
     <div id="app">
@@ -37,13 +39,13 @@
                       @click="editItem(item)"
                       class="btn btn-warning btn-sm"
                     >
-                      Edit
+                      <i class="material-icons">create</i>
                     </button>
                     <button
                       @click="deleteItem(item)"
                       class="btn btn-danger btn-sm"
                     >
-                      Delete
+                      <i class="material-icons">delete</i>
                     </button>
                   </td>
                 </tr>
@@ -51,6 +53,15 @@
             </table>
           </div>
           <div class="col-md-4">
+            <div v-if="submitAlert" class="alert alert-success" role="alert">
+              The entry has been saved
+            </div>
+            <div v-if="updateAlert" class="alert alert-success" role="alert">
+              The entry has been updated
+            </div>
+            <div v-if="deleteAlert" class="alert alert-danger" role="alert">
+              The entry has been deleted
+            </div>
             <form>
               <div class="form-group">
                 <label for="id">ID</label>
@@ -130,10 +141,12 @@
           },
           submitbtn: true,
           updatebtn: false,
+          submitAlert: false,
+          updateAlert: false,
+          deleteAlert: false,
         },
         created() {
           this.view()
-          this.input.id = this.items.length + 1
         },
         methods: {
           view() {
@@ -159,6 +172,9 @@
             ]
           },
           submitForm() {
+            // this.submitAlert = false
+            this.updateAlert = false
+            this.deleteAlert = false
             // set id to timestamp
             let d = new Date()
             let id = d.getTime()
@@ -168,8 +184,7 @@
             let ci = this.input.city
             this.items.push({ id: id, name: nm, email: em, city: ci })
             this.clearForm()
-            // sweetalert2
-            Swal.fire('Added', 'New data added', 'success')
+            this.submitAlert = true
           },
           clearForm() {
             this.submitbtn = true
@@ -182,12 +197,18 @@
           editItem(item) {
             this.submitbtn = false
             this.updatebtn = true
+            this.submitAlert = false
+            this.updateAlert = false
+            this.deleteAlert = false
             this.input.id = item.id
             this.input.name = item.name
             this.input.email = item.email
             this.input.city = item.city
           },
           updateItem(id) {
+            this.submitAlert = false
+            // this.updateAlert = false
+            this.deleteAlert = false
             // find the index of the item where a key matches a value
             let ref = this.items.findIndex((x) => x.id === id)
             // assign is used to merge object with same props (target, source)
@@ -196,24 +217,14 @@
             // let myId = id - 1
             // Object.assign(this.items[myId], this.input)
             this.clearForm()
-            Swal.fire('Updated', 'Entry has been updated', 'success')
+            this.updateAlert = true
           },
           deleteItem(item) {
+            this.submitAlert = false
+            this.updateAlert = false
+            // this.deleteAlert = false
             let del = this.items.indexOf(item)
-            Swal.fire({
-              title: 'Are you sure?',
-              text: "You won't be able to revert this!",
-              icon: 'warning',
-              showCancelButton: true,
-              confirmButtonColor: 'danger',
-              cancelButtonColor: 'warning',
-              confirmButtonText: 'Yes, delete it!',
-            }).then((result) => {
-              if (result.value) {
-                this.items.splice(del, 1)
-                Swal.fire('Deleted!', 'Your file has been deleted.', 'success')
-              }
-            })
+            this.deleteAlert = true
           },
         },
       })
