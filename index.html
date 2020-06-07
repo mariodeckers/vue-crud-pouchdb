@@ -224,6 +224,7 @@
             this.updateAlert = false
             // this.deleteAlert = false
             let del = this.items.indexOf(item)
+            this.items.splice(del, 1)
             this.deleteAlert = true
           },
         },
