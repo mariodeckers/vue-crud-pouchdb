@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vue-crud-pouchdb</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <script src="js/vue.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <div class="container">
+        <br />
+        <div class="row">
+          <div class="col-md-8">
+            <table class="table table-bordered table-striped">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Address</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in items" :key="item.id">
+                  <th scope="row">{{ item.id }}</th>
+                  <td>{{ item.name }}</td>
+                  <td>{{ item.email }}</td>
+                  <td>{{ item.city }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="col-md-4">
+            <form>
+              <div class="form-group">
+                <label for="id">ID</label>
+                <input
+                  type="text"
+                  v-model="input.id"
+                  class="form-control"
+                  id="id"
+                />
+              </div>
+              <div class="form-group">
+                <label for="name">Name</label>
+                <input
+                  type="text"
+                  v-model="input.name"
+                  class="form-control"
+                  id="name"
+                />
+              </div>
+              <div class="form-group">
+                <label for="email">E-mail</label>
+                <input
+                  type="email"
+                  v-model="input.email"
+                  class="form-control"
+                  id="email"
+                />
+              </div>
+              <div class="form-group">
+                <label for="city">Address</label>
+                <input
+                  type="textarea"
+                  v-model="input.city"
+                  class="form-control"
+                  id="city"
+                />
+              </div>
+              <button
+                type="submit"
+                @click.prevent="submitForm"
+                class="btn btn-primary"
+              >
+                Submit
+              </button>
+              <button
+                type="submit"
+                @click.prevent="clearForm"
+                class="btn btn-info"
+              >
+                Clear
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      let app = new Vue({
+        el: '#app',
+        data: {
+          items: [
+            {
+              id: '1',
+              name: 'John',
+              email: 'john@gmail.com',
+              city: 'Brussels',
+            },
+            {
+              id: '2',
+              name: 'Mary',
+              email: 'mary@gmail.com',
+              city: 'Berlin',
+            },
+            {
+              id: '3',
+              name: 'Charlie',
+              email: 'charlie@gmail.com',
+              city: 'London',
+            },
+          ],
+          input: {
+            id: '',
+            name: '',
+            email: '',
+            city: '',
+          },
+        },
+        methods: {
+          submitForm() {
+            let id = this.input.id
+            let nm = this.input.name
+            let em = this.input.email
+            let ci = this.input.city
+            this.items.push({ id: id, name: nm, email: em, city: ci })
+            this.clearForm()
+          },
+          clearForm() {
+            this.input.id = ''
+            this.input.name = ''
+            this.input.email = ''
+            this.input.city = ''
+          },
+        },
+      })
+    </script>
+  </body>
+</html>
