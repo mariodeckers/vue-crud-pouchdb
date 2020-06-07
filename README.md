@@ -7,10 +7,9 @@
 - READ table
 - CREATE items
 
-## v2 - Vue script + Primitive
+## v2 - Vue C + R + U + D
 
-- css: Primitive stylesheet
-
-## v3 - Vue script + Buefy
-
-- css: Buefy
+- vue.js script tag
+- css: bootstrap
+- CRUD table
+- SweetAlert2 (https://sweetalert2.github.io/) for confirmation windows
