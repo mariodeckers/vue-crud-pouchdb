@@ -112,7 +112,7 @@
                 v-if="updatebtn"
                 type="submit"
                 @click.prevent="updateItem(input.id)"
-                class="btn btn-primary"
+                class="btn btn-warning"
               >
                 Update
               </button>
@@ -146,29 +146,35 @@
           deleteAlert: false,
         },
         created() {
-          this.view()
+          // this.view()
+          // this.localData()
+          this.items = JSON.parse(localStorage.getItem('vue-items'))
         },
         methods: {
+          localData() {
+            let parsed = JSON.stringify(this.items)
+            localStorage.setItem('vue-items', parsed)
+          },
           view() {
             this.items = [
-              {
-                id: '1',
-                name: 'John',
-                email: 'john@gmail.com',
-                city: 'Brussels',
-              },
-              {
-                id: '2',
-                name: 'Mary',
-                email: 'mary@gmail.com',
-                city: 'Berlin',
-              },
-              {
-                id: '3',
-                name: 'Charlie',
-                email: 'charlie@gmail.com',
-                city: 'London',
-              },
+              // {
+              //   id: '1',
+              //   name: 'John',
+              //   email: 'john@gmail.com',
+              //   city: 'Brussels',
+              // },
+              // {
+              //   id: '2',
+              //   name: 'Mary',
+              //   email: 'mary@gmail.com',
+              //   city: 'Berlin',
+              // },
+              // {
+              //   id: '3',
+              //   name: 'Charlie',
+              //   email: 'charlie@gmail.com',
+              //   city: 'London',
+              // },
             ]
           },
           submitForm() {
@@ -184,6 +190,7 @@
             let ci = this.input.city
             this.items.push({ id: id, name: nm, email: em, city: ci })
             this.clearForm()
+            this.localData()
             this.submitAlert = true
           },
           clearForm() {
@@ -217,6 +224,7 @@
             // let myId = id - 1
             // Object.assign(this.items[myId], this.input)
             this.clearForm()
+            this.localData()
             this.updateAlert = true
           },
           deleteItem(item) {
@@ -224,6 +232,8 @@
             this.updateAlert = false
             // this.deleteAlert = false
             let del = this.items.indexOf(item)
+            this.items.splice(del, 1)
+            this.localData()
             this.deleteAlert = true
           },
         },
