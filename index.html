@@ -11,6 +11,7 @@
     />
     <script src="js/vue.js"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9.14.2/dist/sweetalert2.all.min.js"></script> -->
+    <script src="//cdn.jsdelivr.net/npm/pouchdb@7.1.1/dist/pouchdb.min.js"></script>
   </head>
   <body>
     <div id="app">
@@ -29,8 +30,8 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="item in items" :key="item.id">
-                  <th scope="row">{{ item.id }}</th>
+                <tr v-for="item in items" :key="item._id">
+                  <th scope="row">{{ item._id }}</th>
                   <td>{{ item.name }}</td>
                   <td>{{ item.email }}</td>
                   <td>{{ item.city }}</td>
@@ -69,7 +70,7 @@
                   type="text"
                   class="form-control"
                   id="id"
-                  v-model="input.id"
+                  v-model="input._id"
                   readonly
                 />
               </div>
@@ -111,7 +112,7 @@
               <button
                 v-if="updatebtn"
                 type="submit"
-                @click.prevent="updateItem(input.id)"
+                @click.prevent="updateItem(input._id)"
                 class="btn btn-warning"
               >
                 Update
@@ -129,12 +130,13 @@
       </div>
     </div>
     <script>
+      window.db = new PouchDB('vue-crud')
       let app = new Vue({
         el: '#app',
         data: {
           items: [],
           input: {
-            id: '',
+            _id: '',
             name: '',
             email: '',
             city: '',
@@ -146,36 +148,22 @@
           deleteAlert: false,
         },
         created() {
-          // this.view()
-          // this.localData()
-          this.items = JSON.parse(localStorage.getItem('vue-items'))
+          this.view()
         },
         methods: {
-          localData() {
-            let parsed = JSON.stringify(this.items)
-            localStorage.setItem('vue-items', parsed)
-          },
           view() {
-            this.items = [
-              // {
-              //   id: '1',
-              //   name: 'John',
-              //   email: 'john@gmail.com',
-              //   city: 'Brussels',
-              // },
-              // {
-              //   id: '2',
-              //   name: 'Mary',
-              //   email: 'mary@gmail.com',
-              //   city: 'Berlin',
-              // },
-              // {
-              //   id: '3',
-              //   name: 'Charlie',
-              //   email: 'charlie@gmail.com',
-              //   city: 'London',
-              // },
-            ]
+            let vm = this
+            db.allDocs({
+              include_docs: true,
+            })
+              .then(function (response) {
+                for (var i = 0; i < response.rows.length; i++) {
+                  vm.items.push(response.rows[i].doc)
+                }
+              })
+              .catch(function (error) {
+                console.log(error)
+              })
           },
           submitForm() {
             // this.submitAlert = false
@@ -183,20 +171,33 @@
             this.deleteAlert = false
             // set id to timestamp
             let d = new Date()
-            let id = d.getTime()
-            // let id = this.input.id
+            let id = d.getTime().toString()
+            // let id = '5'
+            // let id = this.input._id
             let nm = this.input.name
             let em = this.input.email
             let ci = this.input.city
-            this.items.push({ id: id, name: nm, email: em, city: ci })
+            // pouchDB
+            db.put({
+              _id: id,
+              name: nm,
+              email: em,
+              city: ci,
+            })
+              .then(function (response) {})
+              .catch(function (error) {
+                console.log(error)
+              })
+            // update vue array
+            this.items.push({ _id: id, name: nm, email: em, city: ci })
+            // clean up
             this.clearForm()
-            this.localData()
             this.submitAlert = true
           },
           clearForm() {
             this.submitbtn = true
             this.updatebtn = false
-            this.input.id = ''
+            this.input._id = ''
             this.input.name = ''
             this.input.email = ''
             this.input.city = ''
@@ -207,7 +208,7 @@
             this.submitAlert = false
             this.updateAlert = false
             this.deleteAlert = false
-            this.input.id = item.id
+            this.input._id = item._id
             this.input.name = item.name
             this.input.email = item.email
             this.input.city = item.city
@@ -217,14 +218,32 @@
             // this.updateAlert = false
             this.deleteAlert = false
             // find the index of the item where a key matches a value
-            let ref = this.items.findIndex((x) => x.id === id)
+            let ref = this.items.findIndex((x) => x._id === id)
             // assign is used to merge object with same props (target, source)
             Object.assign(this.items[ref], this.input)
             // Below is the original code which does not work when id's get out of sync
             // let myId = id - 1
             // Object.assign(this.items[myId], this.input)
+            // pouchDB
+            let nm = this.input.name
+            let em = this.input.email
+            let ci = this.input.city
+            db.get(id)
+              .then(function (doc) {
+                return db.put({
+                  _id: id,
+                  _rev: doc._rev,
+                  name: nm,
+                  email: em,
+                  city: ci,
+                })
+              })
+              .then(function (response) {})
+              .catch(function (error) {
+                console.log(error)
+              })
+            // clean up
             this.clearForm()
-            this.localData()
             this.updateAlert = true
           },
           deleteItem(item) {
@@ -233,7 +252,16 @@
             // this.deleteAlert = false
             let del = this.items.indexOf(item)
             this.items.splice(del, 1)
-            this.localData()
+            // pouchDB
+            db.get(item._id)
+              .then(function (doc) {
+                return db.remove(doc)
+              })
+              .then(function (response) {})
+              .catch(function (error) {
+                console.log(error)
+              })
+            // clean up
             this.deleteAlert = true
           },
         },

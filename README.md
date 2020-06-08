@@ -1,9 +1,10 @@
 # vue-crud-pouchdb
 
-## v3 - Vue CRUD Local Storage
+## v4 - Vue CRUD PouchDB
 
 - vue.js script tag
 - css: bootstrap
 - CRUD table
 - Google Material icons for the buttons (https://google.github.io/material-design-icons/)
-- Persist data to local storage
+- Persist data to PouchDB (https://pouchdb.com/)
+- Check Dev Tools > Application > IndexedDB > document-store
