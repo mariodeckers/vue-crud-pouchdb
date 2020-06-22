@@ -38,3 +38,12 @@
 - Google Material icons for the buttons (https://google.github.io/material-design-icons/)
 - Persist data to PouchDB (https://pouchdb.com/)
 - Check Dev Tools > Application > IndexedDB > document-store
+
+## v5 - Vue CRUD PouchDB + CouchDB
+
+- vue.js script tag
+- css: bootstrap
+- CRUD table
+- Google Material icons for the buttons (https://google.github.io/material-design-icons/)
+- Persist data to PouchDB (https://pouchdb.com/)
+- Sync with remote CouchDB (localhost or Raspberry Pi)
