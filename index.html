@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vue-crud-pouchdb</title>
     <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <!-- below link to google icons sets cookie with Same-Site set to none which will cause problems in future -->
+    <!-- install icons locally? -->
     <link
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet"
@@ -130,7 +132,9 @@
       </div>
     </div>
     <script>
-      window.db = new PouchDB('vue-crud')
+      // window.localCouch = new PouchDB('vue-crud')
+      // window.remoteCouch = 'http://serveradmin:couchdb@127.0.0.1:5984/vue-crud'
+
       let app = new Vue({
         el: '#app',
         data: {
@@ -146,24 +150,46 @@
           submitAlert: false,
           updateAlert: false,
           deleteAlert: false,
+          localCouch: null,
         },
-        created() {
-          this.view()
+        mounted() {
+          this.localCouch = new PouchDB('vue-crud')
+          let remoteCouch = 'http://user:secret@raspberrypi:5984/vue-crud'
+          // let remoteCouch = 'http://user@127.0.0.1:5984/vue-crud'
+          // let remoteCouch = 'http://serveradmin:couchdb@127.0.0.1:5984/vue-crud'
+          this.localCouch
+            .sync(remoteCouch, { live: true, retry: true })
+            .on('change', (change) => {
+              console.log('something changed ', change)
+              this.fetch()
+            })
+            .on('error', (err) => {
+              // handle error
+              console.log('something went wrong!', err)
+            })
+          // this.sync()
+          this.fetch() // initial fetch
         },
         methods: {
-          view() {
-            let vm = this
-            db.allDocs({
-              include_docs: true,
-            })
-              .then(function (response) {
-                for (var i = 0; i < response.rows.length; i++) {
-                  vm.items.push(response.rows[i].doc)
+          fetch() {
+            this.localCouch
+              .allDocs({ include_docs: true })
+              .then((response) => {
+                let list = []
+                for (let i = 0; i < response.rows.length; i++) {
+                  list.push(response.rows[i].doc)
                 }
+                this.items = list
               })
-              .catch(function (error) {
-                console.log(error)
+              .then((list) => {
+                this.todos = list
+                // .then((response) => {
+                //   for (let i = 0; i < response.rows.length; i++) {
+                //     this.items.push(response.rows[i].doc)
+                //   }
+                console.log('fetched all items')
               })
+              .catch(console.error)
           },
           submitForm() {
             // this.submitAlert = false
@@ -178,12 +204,13 @@
             let em = this.input.email
             let ci = this.input.city
             // pouchDB
-            db.put({
-              _id: id,
-              name: nm,
-              email: em,
-              city: ci,
-            })
+            this.localCouch
+              .put({
+                _id: id,
+                name: nm,
+                email: em,
+                city: ci,
+              })
               .then(function (response) {})
               .catch(function (error) {
                 console.log(error)
@@ -228,9 +255,10 @@
             let nm = this.input.name
             let em = this.input.email
             let ci = this.input.city
-            db.get(id)
+            this.localCouch
+              .get(id)
               .then(function (doc) {
-                return db.put({
+                return app.localCouch.put({
                   _id: id,
                   _rev: doc._rev,
                   name: nm,
@@ -253,9 +281,10 @@
             let del = this.items.indexOf(item)
             this.items.splice(del, 1)
             // pouchDB
-            db.get(item._id)
+            this.localCouch
+              .get(item._id)
               .then(function (doc) {
-                return db.remove(doc)
+                return app.localCouch.remove(doc)
               })
               .then(function (response) {})
               .catch(function (error) {
