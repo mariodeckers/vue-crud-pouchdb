@@ -176,19 +176,23 @@
               .allDocs({ include_docs: true })
               .then((response) => {
                 let list = []
-                for (let i = 0; i < response.rows.length; i++) {
-                  list.push(response.rows[i].doc)
+                for (let row of response.rows) {
+                  list.push(row.doc)
                 }
+                // above is the more modern way of writing for loops
+                // for (let i = 0; i < response.rows.length; i++) {
+                //   list.push(response.rows[i].doc)
+                // }
                 this.items = list
               })
-              .then((list) => {
-                this.todos = list
-                // .then((response) => {
-                //   for (let i = 0; i < response.rows.length; i++) {
-                //     this.items.push(response.rows[i].doc)
-                //   }
-                console.log('fetched all items')
-              })
+              // .then((list) => {
+              //   this.todos = list
+              //   // .then((response) => {
+              //   //   for (let i = 0; i < response.rows.length; i++) {
+              //   //     this.items.push(response.rows[i].doc)
+              //   //   }
+              //   console.log('fetched all items')
+              // })
               .catch(console.error)
           },
           submitForm() {
